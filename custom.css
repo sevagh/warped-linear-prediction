@@ -1,0 +1,29 @@
+h1, h2, h3, h4,
+p, li
+{
+    font-family: Optima, Candara, Calibri, sans-serif;
+    font-weight: 400;
+}
+
+h1 { font-size: 300% !important; }
+h2 { font-size: 220% !important; }
+h3 { font-size: 180% !important; }
+
+p, li 
+{
+    font-size: 13pt;
+    line-height: 1.55;
+}
+
+code { font-weight: bold; }
+
+a, a code { 
+    color: #337ab7 !important;
+    text-decoration: none !important; 
+}
+a:focus, a:hover,
+a:focus code, a:hover code
+{
+    color: #336699 !important;
+    text-decoration: underline !important; 
+}
