@@ -1,17 +1,12 @@
-dev: jupyter_dev
-dev: web_dev
-
-jupyter_dev:
+dev:
 	jupyter notebook &
-
-web_dev:
 	twistd -n web -p 'tcp:port=8000' --path ./ &
 
-web_gen:
+gen:
 	jupyter nbconvert *.ipynb
 
-dockill:
+kill:
 	pkill twistd
 	pkill jupyter
 
-.PHONY: docdev docgen dockill
+.PHONY: dev gen kill gen
