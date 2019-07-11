@@ -1,9 +1,9 @@
 dev:
 	jupyter notebook &
-	twistd -n web -p 'tcp:port=8000' --path ./docs &
+	twistd -n web -p 'tcp:port=8000' --path ./ &
 
 gen:
-	jupyter nbconvert docs/*.ipynb
+	jupyter nbconvert *.ipynb
 
 kill:
 	pkill twistd
