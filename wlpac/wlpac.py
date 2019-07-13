@@ -4,43 +4,46 @@ import scipy.signal
 import scipy.io
 import scipy.io.wavfile
 import pickle
+import lzma
+import os
 
 
 class WLPACInfo(object):
-    def __init__(self, fs, q1, q2, q3, l_, r_, lb):
+    def __init__(self, fs, q, l_, r_, lb):
         self.fs = fs
-        self.q1 = q1
-        self.q2 = q2
-        self.q3 = q3
+        self.q = q
         self.l_ = l_
         self.r_ = r_
         self.lb = lb
 
 
     def save_to_file(self, path):
-        with open(path, 'wb') as f:
+        with lzma.open(path, 'wb') as f:
             pickle.dump(self, f)
 
 
     @classmethod
     def load_from_file(cls, path):
-        with open(path, 'rb') as f:
+        with lzma.open(path, 'rb') as f:
             wlpac_obj = pickle.load(f)
             return wlpac_obj
 
 
 
-def wlpac_encode(in_wav_file, out_wlpac_file):
+def wlpac_encode(in_wav_file, out_wlpac_file, quality=0.5):
     fs, x = scipy.io.wavfile.read(in_wav_file)              
     r = wfir(x, fs, 1)
-    (q1, q2, q3), l_, r_, lb = quantize(r, 0.5)
-    wlpac_obj = WLPACInfo(fs, q1, q2, q3, l_, r_, lb)
+    q, l_, r_, lb = quantize(r, quality)
+    wlpac_obj = WLPACInfo(fs, q, l_, r_, lb)
     wlpac_obj.save_to_file(out_wlpac_file)
+    orig_size = os.path.getsize(in_wav_file)
+    new_size = os.path.getsize(out_wlpac_file)
+    print('Wrote {0} with quality {1}, {2:.2f}% smaller'.format(out_wlpac_file, quality, ((orig_size-new_size)/orig_size)*100.0))
 
 
 def wlpac_decode(in_wlpac_file, out_wav_file):
     w = WLPACInfo.load_from_file(in_wlpac_file)
-    r_prime = unquantize(w.q1, w.q2, w.q3, w.l_, w.r_, w.lb)
+    r_prime = unquantize(w.q, w.l_, w.r_, w.lb)
     x_prime = wfir_reconstruct(r_prime, w.fs, 1)
     scipy.io.wavfile.write(out_wav_file, w.fs, x_prime)
 
@@ -51,32 +54,10 @@ def quantize(x, ratio: float):
     len_b = int(ratio*float(len(x)))
     bins = numpy.linspace(min_x, max_x, len_b)
     inds = numpy.digitize(x, bins)
-    return rlencode(inds), min_x, max_x, len_b
+    return inds, min_x, max_x, len_b
 
 
-def rlencode(x):
-    where = numpy.flatnonzero
-    x = numpy.asarray(x)
-    n = len(x)
-
-    starts = numpy.r_[0, where(~numpy.isclose(x[1:], x[:-1], equal_nan=True)) + 1]
-    lengths = numpy.diff(numpy.r_[starts, n])
-    values = x[starts]
-    
-    return starts, lengths, values
-
-
-def rldecode(starts, lengths, values):
-    ends = starts + lengths
-    n = ends[-1]
-    x = numpy.full(n, numpy.nan)
-    for lo, hi, val in zip(starts, ends, values):
-        x[lo:hi] = val
-    return x
-
-
-def unquantize(binned1, binned2, binned3, l, r, lb):
-    binned = rldecode(binned1, binned2, binned3).astype(numpy.int)
+def unquantize(binned, l, r, lb):
     bins = numpy.linspace(l, r, lb)
     ret = []
     for b in binned:
