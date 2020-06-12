@@ -10,11 +10,11 @@ This repository contains an introduction to warped linear prediction through Jup
 
 ### WLPAC codec description
 
-WLPAC, or "Warped Linear Prediction Audio Codec", is an audio codec. In this repository I use wlpac to refer to a series of experimental new audio file formats based on the WLPC residual and FLAC - files are stored with the extension `.wlp.flac`.
+WLPAC, or "Warped Linear Prediction Audio Codec", is an audio codec. In this repository I use wlpac to refer to an experimental new audio file format based on the WLPC residual in a FLAC container - files are stored with the extension `.wlp.flac`.
 
-Input files should be uncompressed WAV files. Space savings are measured compared to the original WAV file, and the PESQ and spectrogram are taken straight from the `.wlpc.flac` file.
+Input files should be uncompressed WAV files. Space savings are measured compared to the original WAV file, and the PESQ and spectrogram are taken straight from the `.wlp.flac` file.
 
-You can play `.wlpac.flac` files with any media player, e.g. mpv, making this a well-suited general purpose audio codec.
+You can play `.wlp.flac` files with any media player, e.g. mpv, making this a well-suited general purpose audio codec.
 
 Every implementation starts at **stage 1**, using WLP to find the [residual signal](https://sevagh.github.io/warped-linear-prediction/Listening%20tests%2C%20speech%20and%20music.html), which should be a smaller signal than the original. Optional parameters to stage 1 are the quantization ratio, and Huffman encoding. This is followed by a pass at **stage 2** to store the residual using FLAC as a container.
 
