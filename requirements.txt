@@ -1,0 +1,8 @@
+cython
+scipy
+numpy
+twisted
+jupyter
+soundfile
+matplotlib
+pesq
